@@ -1,0 +1,10 @@
+# 機密與本機資料，絕對不要上傳
+.env
+*.sqlite
+.n8n/
+.n8n_data/
+.n8n_backup/
+ngrok.yml
+*.key
+*.pem
+node_modules/
