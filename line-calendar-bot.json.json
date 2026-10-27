@@ -1,0 +1,519 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5fb8a13b-4227-4237-9d4d-7308a694835d",
+        "options": {}
+      },
+      "id": "ff2e652f-1c79-45a7-93db-6188aca4e78b",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        320
+      ],
+      "webhookId": "5fb8a13b-4227-4237-9d4d-7308a694835d"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.events[0].source.userId }}"
+      },
+      "id": "1102dd1b-67b4-4d65-82d8-89fced9567e3",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        368,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "查詢 Google 日曆在指定時間範圍內的行程。After 與 Before 使用 ISO 8601 格式並帶 +08:00。",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "an108chien@gmail.com",
+          "mode": "list",
+          "cachedResultName": "an108chien@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "6b0bd116-e6f7-40a4-90b6-053f39fff58c",
+      "name": "Get many events in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        688
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CibhQF6AHCLjIj7x",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "在 Google 日曆建立新行程。必須提供 Title、Start、End（ISO 8601 帶 +08:00）與 Reminder_Minutes_Before。只有呼叫此工具才會真正建立行程。",
+        "calendar": {
+          "__rl": true,
+          "value": "an108chien@gmail.com",
+          "mode": "list",
+          "cachedResultName": "an108chien@gmail.com",
+          "cachedResultUrl": ""
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "description": "={{ $fromAI('Description', `Optional event notes`, 'string', '') }}",
+          "summary": "={{ $fromAI('Title', `Event title in Traditional Chinese, e.g. 完成機率作業. Never leave empty.`, 'string') }}"
+        },
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "popup",
+              "minutes": "={{ $fromAI('Reminder_Minutes_Before', `How many minutes before the start time to show the reminder popup. Use 0 to remind exactly at the start time.`, 'number', 0) }}"
+            }
+          ]
+        }
+      },
+      "id": "f40020f9-cacf-4d9b-bd96-3156b8a39f1b",
+      "name": "Create an event in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        704
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CibhQF6AHCLjIj7x",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "修改 Google 日曆中已存在的行程。必須先用查詢工具找到該行程的 Event_ID。Title、Start、End、Reminder_Minutes_Before 都必須填入「修改後的完整值」：沒有要改的欄位就沿用查詢結果中的原值（原標題、原開始/結束時間、原提醒分鐘數），不可留空。時間用 ISO 8601 帶 +08:00。",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "an108chien@gmail.com",
+          "mode": "list",
+          "cachedResultName": "an108chien@gmail.com",
+          "cachedResultUrl": ""
+        },
+        "eventId": "={{ $fromAI('Event_ID', `The id of the existing event, taken from the Get many events tool result`, 'string') }}",
+        "useDefaultReminders": false,
+        "updateFields": {
+          "end": "={{ $fromAI('End', `End time after the change, ISO 8601 with +08:00. Keep the original if not changing it.`, 'string') }}",
+          "start": "={{ $fromAI('Start', `Start time after the change, ISO 8601 with +08:00. Keep the original if not changing it.`, 'string') }}",
+          "summary": "={{ $fromAI('Title', `Full event title after the change. Keep the original title if not changing it. Never empty.`, 'string') }}"
+        },
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "popup",
+              "minutes": "={{ $fromAI('Reminder_Minutes_Before', `Popup reminder minutes before start after the change. Keep the original reminders.overrides minutes if not changing it; 0 = at start time.`, 'number', 0) }}"
+            }
+          ]
+        }
+      },
+      "id": "f4a53aae-e9e5-41b6-832a-0d99df66da2e",
+      "name": "Update an event in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        592
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CibhQF6AHCLjIj7x",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "刪除 Google 日曆中已存在的行程。必須先用查詢工具找到該行程的 Event_ID。只有呼叫此工具才會真正刪除。",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "an108chien@gmail.com",
+          "mode": "list",
+          "cachedResultName": "an108chien@gmail.com",
+          "cachedResultUrl": ""
+        },
+        "eventId": "={{ $fromAI('Event_ID', `The id of the event to delete, taken from the Get many events tool result`, 'string') }}",
+        "options": {}
+      },
+      "id": "f8734aa0-e4ea-4060-9edd-02046f7b3509",
+      "name": "Delete an event in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        592
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CibhQF6AHCLjIj7x",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.line.me/v2/bot/message/push",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Webhook').item.json.body.events[0].source.userId, messages: [{ type: \"text\", text: $json.output }] }) }}",
+        "options": {}
+      },
+      "id": "25421a11-8731-4842-b17b-eedc9c15d702",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        656,
+        320
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Rjg1BfZ0Dqrx8DEk",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=#用戶訊息\n {{ $json.body.events[0].message.text }}"
+            },
+            {
+              "role": "system",
+              "content": "#角色 \n你是小花\n\n#任務\n喜歡跟用戶聊天 喜歡傳emoji"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "47f9a71e-d3b0-4acf-ad11-197803802e79",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        304,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 50
+            }
+          ]
+        }
+      },
+      "id": "9334e8a2-72a1-47fe-a13e-2564e6cdfe64",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "an108chien@gmail.com",
+          "mode": "list",
+          "cachedResultName": "an108chien@gmail.com",
+          "cachedResultUrl": ""
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.setZone('Asia/Taipei').startOf('day').toISO() }}",
+        "timeMax": "={{ $now.setZone('Asia/Taipei').endOf('day').toISO() }}",
+        "options": {
+          "orderBy": "startTime"
+        }
+      },
+      "id": "027c0ad8-070c-4aef-b40f-6e3934c2d006",
+      "name": "Get many events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        912
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CibhQF6AHCLjIj7x",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst now = new Date();\nconst weekday = new Intl.DateTimeFormat('en-US', {\n  timeZone: 'Asia/Taipei',\n  weekday: 'long',\n}).format(now);\n\nconst dateText = new Intl.DateTimeFormat('zh-TW', {\n  timeZone: 'Asia/Taipei',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).format(now);\n\nconst dailyItems = [\n  '鑰匙', '錢包', '平板', '鍵盤', '水壺',\n  '衛生紙', '耳機', '鉛筆盒', '學生證',\n];\n\nconst weeklyItems = {\n  Monday: ['機率資料夾（功課）', '電腦', '滑鼠', '電腦充電線'],\n  Tuesday: ['初等資料夾（功課）', '電腦', '滑鼠'],\n  Wednesday: ['電腦', '滑鼠'],\n  Thursday: ['電腦', '滑鼠', '電腦充電線'],\n  Friday: ['機率資料夾'],\n  Saturday: [],\n  Sunday: [],\n};\n\nconst items = [...new Set([\n  ...dailyItems,\n  ...(weeklyItems[weekday] || []),\n])];\n\nconst events = $input.all().map(item => item.json).filter(e => Object.keys(e).length > 0);\n\nconst time = value => {\n  if (!value) return '';\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return '';\n  return new Intl.DateTimeFormat('zh-TW', {\n    timeZone: 'Asia/Taipei',\n    hour: '2-digit',\n    minute: '2-digit',\n    hourCycle: 'h23',\n  }).format(date);\n};\n\nconst eventLines = events.map(event => {\n  const title = event.summary || event.title || '（未命名行程）';\n  const start = event.start?.dateTime || event.start?.date || event.startTime;\n  const end = event.end?.dateTime || event.end?.date || event.endTime;\n\n  if (!start) return `• ${title}`;\n\n  const startTime = time(start);\n  const endTime = time(end);\n\n  if (!startTime) return `• 全天／${title}`;\n  return `• ${startTime}${endTime ? `–${endTime}` : ''} ${title}`;\n});\n\nconst message = [\n  `☀️ 今日提醒｜${dateText}`,\n  '',\n  '📅 今日行程',\n  ...(eventLines.length ? eventLines : ['• 今天沒有查到行程']),\n  '',\n  '🎒 出門必帶',\n  ...items.map(item => `☐ ${item}`),\n].join('\\n');\n\nreturn [{\n  json: {\n    message,\n    weekday,\n    dateText,\n    eventCount: events.length,\n  }\n}];\n"
+      },
+      "id": "7f11e545-31e1-4e59-8176-0fe018a692da",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"U60681eb5bc38e349d32e9fe89baabb6c\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": {{ JSON.stringify($json.message) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "abf6dd32-d15a-4ace-9e6f-a9e1a70ac25a",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        736,
+        912
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Rjg1BfZ0Dqrx8DEk",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        528
+      ],
+      "id": "08fda2a5-8080-4a97-a748-544fe9f50cab",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "z4gAM8nBK0n0uSWh",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=#用戶訊息\n{{ $json.body.events[0].message.text }}",
+        "options": {
+          "systemMessage": "=#角色\n你叫花花 喜歡用花花emoji \n\n#任務\n提醒我每天上學要帶的東西\n\n### 每日攜帶物品規則\n\n每天早上整理 Checklist 時，依照台灣時區 Asia/Taipei 判斷星期。\n\n**每天必帶物品：**\n- 鑰匙\n- 錢包\n- 平板\n- 鍵盤\n- 水壺\n- 衛生紙\n- 耳機\n- 鉛筆盒\n- 學生證\n\n**依星期增加的物品：**\n- 週一：機率資料夾（功課）、電腦、滑鼠、電腦充電線、耳機\n- 週二：初等資料夾（功課）、電腦、滑鼠\n- 週三：電腦、滑鼠\n- 週四：電腦、滑鼠、電腦充電線、耳機\n- 週五：機率資料夾\n\n週六、週日仍列出每天必帶物品；若沒有其他已知任務或安排，不要自行新增事項。\n\n**Checklist 格式：**\n☀️ 今日攜帶清單｜日期、星期\n\n- [ ] 鑰匙\n- [ ] 錢包\n- [ ] 平板\n- [ ] 鍵盤\n- [ ] 水壺\n- [ ] 衛生紙\n- [ ] 耳機\n- [ ] 鉛筆盒\n- [ ] 學生證\n\n接著列出當天額外物品。為避免重複，若物品已在每天必帶清單中出現，就不要再列一次。\n\n### 提醒時間與傳送方式\n每天早上 07:50（Asia/Taipei）透過 LINE 主動傳送 Checklist。每日排程由 n8n Schedule Trigger 負責；不得假設單靠 System Message 就能啟動定時傳送。\n\n### 任務規則\n將我提供的作業、截止日期與當日安排加入 Checklist。不得自行編造未提供的任務或截止日期。不要為攜帶物品建立 Google Calendar 事件。\n\n# Google Calendar 使用規則\n- 當使用者詢問行程時，使用已連接的 Google Calendar 工具查詢。\n- 當使用者要求新增行程時，若事件名稱、日期、開始時間與結束時間都已提供，立刻呼叫「Create an event in Google Calendar」工具建立，不要再請使用者確認。\n- 如果缺少必要資訊，先詢問使用者；使用者補齊或回覆「確認」後，立刻呼叫建立工具，參數沿用對話中先前提到的標題、時間與提醒。\n- 絕對不可以在沒有實際呼叫建立工具並取得成功結果的情況下，說已新增或附上連結；連結只能使用工具回傳的 htmlLink。\n- 所有日期與時間均以台灣時間（Asia/Taipei）為準，時間格式使用 ISO 8601 並帶 +08:00，例如 2026-10-14T22:30:00+08:00。\n- 新增行程時一定要填入 Title（事件標題），不可留空。\n- 使用者說「時間到提醒」時，Reminder_Minutes_Before 設為 0；說「提前 N 分鐘提醒」時設為 N。\n- 使用者要求修改或刪除行程時：先用「Get many events in Google Calendar」查詢相關日期找到該行程與其 id，再呼叫「Update an event in Google Calendar」或「Delete an event in Google Calendar」。\n- 修改時，Title、Start、End、Reminder_Minutes_Before 都要給完整值；沒要改的欄位沿用原行程的值（提醒分鐘數取原行程 reminders.overrides 的 minutes，沒有則用 0）。\n- 若符合條件的行程有多個或找不到，先列出候選請使用者確認，不可猜測。刪除前若使用者指的行程不明確，也要先確認。\n- 絕對不可以在沒有實際呼叫修改/刪除工具並成功的情況下，說已修改或已刪除。\n- 現在時間：{{ $now.setZone('Asia/Taipei').toFormat('yyyy-MM-dd HH:mm cccc') }}"
+        }
+      },
+      "id": "4884a2df-8ea1-432f-ad5a-8136cf366e51",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        336,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c3d63fe2-67e3-4fd8-af6d-fc93374ab7a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fcce81435e5ad22f4d441f16a06300eb231216b65b06115b48f3b6b28e20962e"
+  },
+  "nodeGroups": [],
+  "id": "QB9snlEkAuK0Jtvc",
+  "tags": []
+}
